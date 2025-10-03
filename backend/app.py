@@ -28,7 +28,6 @@ def signup():
 
     if User.query.filter_by(username=username).first() is not None:
         return jsonify({"message":"Username already exists"}), 400
-    
     else:
         hashed_password = generate_password_hash(password)
         new_user = User(username=username, email=email, password=hashed_password, role=role)
