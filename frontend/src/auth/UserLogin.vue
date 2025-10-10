@@ -10,7 +10,10 @@
         <label for="password">Password:</label>
         <input type="password" id="password" v-model="password" required />
       </div>
-      <button type="submit">Login</button>
+      <button type="submit">
+        Login
+        <i class="bi bi-door-open-fill"></i>
+      </button>
     </form>
     <div v-if="errorMessage">{{ errorMessage }}</div>
   </div>
@@ -31,7 +34,7 @@ export default {
   methods: {
     async loginUser() {
       try {
-        const response = await axios.post("http://127.0.0.1:5000/login", {
+        const response = await axios.post("/login", {
           username: this.username,
           password: this.password,
         });

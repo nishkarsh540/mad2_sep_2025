@@ -2,6 +2,9 @@ import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '../views/HomeView.vue'
 import SignupUser from '../auth/UserSignup.vue'
 import LoginUser from '../auth/UserLogin.vue'
+import CategoryManage from '@/components/CategoryManage.vue'
+
+
 const routes = [
   {
     path: '/',
@@ -25,6 +28,11 @@ const routes = [
     path: '/login',
     name: 'login',
     component: LoginUser
+  },
+  {
+    path: '/categories',
+    name: 'CategoryManage',
+    component: CategoryManage
   }
 ]
 

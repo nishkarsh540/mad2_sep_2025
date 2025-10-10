@@ -68,12 +68,12 @@ class CategoryResource(Resource):
     def post(self):
         name = request.json.get('name')
         if Category.query.filter_by(name=name).first() is not None:
-            return jsonify({"message":"Category already exists"}), 400  
+            return {"message":"Category already exists"}, 400
         
         new_category = Category(name=name)
         db.session.add(new_category)
         db.session.commit()
-        return jsonify({"message":"Category created successfully"}), 201
+        return {"message":"Category created successfully"}, 201
 
 api.add_resource(CategoryResource, '/categories')
 
