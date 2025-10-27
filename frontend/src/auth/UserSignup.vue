@@ -41,6 +41,9 @@ export default {
           password: this.password,
         });
         this.$router.push("/login");
+        this.username = "";
+        this.email = "";
+        this.password = "";
       } catch (error) {
         this.errorMessage = "Signup failed. Please try again.";
       }

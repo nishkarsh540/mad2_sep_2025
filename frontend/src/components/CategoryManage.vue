@@ -1,7 +1,7 @@
 <template>
   <div>
     <h2>Category Management</h2>
-
+    <button @click="exportcsv">Download Report</button>
     <input
       type="text"
       v-model="searchQuery"
@@ -102,6 +102,17 @@ export default {
     },
     startEditing(category) {
       this.editingCategoryId = category.id;
+    },
+    exportcsv() {
+      axios.post("/export/1", {}, { responseType: "blob" }).then((response) => {
+        const url = window.URL.createObjectURL(new Blob([response.data]));
+        const downloadLink = document.createElement("a");
+        downloadLink.href = url;
+        downloadLink.setAttribute("download", "report.csv");
+        document.body.appendChild(downloadLink);
+        downloadLink.click();
+        document.body.removeChild(downloadLink);
+      });
     },
   },
 };

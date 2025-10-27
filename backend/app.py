@@ -4,13 +4,22 @@ from flask_cors import CORS
 from flask_jwt_extended import JWTManager, jwt_required, create_access_token, get_jwt_identity, get_jwt_identity, unset_jwt_cookies
 from model import db, User,Category
 from werkzeug.security import generate_password_hash, check_password_hash
-
+import redis
+from flask_caching import Cache
+from celery_config import celery
 app = Flask(__name__)
+
+redis_client = redis.Redis(host='localhost', port=6379, db=0)
+
+cache = Cache(app,config={
+    'CACHE_TYPE':'redis',
+    'CACHE_REDIS':redis_client,
+})
 
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///vehicle.sqlite'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['JWT_SECRET_KEY'] = 'vehicle'
-
+celery.conf.update(app.config)
 
 db.init_app(app)
 CORS(app,origins='*')
@@ -75,7 +84,31 @@ class CategoryResource(Resource):
         db.session.commit()
         return {"message":"Category created successfully"}, 201
 
+
+class ExportResource(Resource):
+    def post(self,user_id):
+        try:
+            from tasks import export_categories_details_as_csv
+            task = export_categories_details_as_csv()
+            response = make_response(task)
+
+            response.headers['Content-Disposition'] = 'attachment; filename=categories_report.csv'
+            response.headers['Content-Type'] = 'text/csv'
+            return response
+        except Exception as e:
+            return {"message":"Error initiating CSV export", "error": str(e)}, 500
+
+
+class StatPage(Resource):
+    @cache.cached(timeout=60)
+    def get(self):
+        roles_count = db.session.query(User.role, db.func.count(User.id)).group_by(User.role).all()
+        stats = {role: count for role, count in roles_count}
+        return stats, 200
+    
 api.add_resource(CategoryResource, '/categories')
+api.add_resource(ExportResource, '/export/<int:user_id>')
+api.add_resource(StatPage, '/stats')    
 
 if __name__ == '__main__':
     app.run(debug=True)
